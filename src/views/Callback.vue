@@ -11,7 +11,7 @@ export default {
   name: 'callback',
   components: {
   },
-  mounted(){
+  async mounted(){
     //TODO refactor this.
     // get the params
     const hash = window.location.hash.substring(1);
@@ -23,12 +23,17 @@ export default {
       options[kv[0]] = kv[1];
     })
 
+
     this.$store.commit("updateAuth",{
       accessToken:options.access_token,
       expiresIn:options.expires_in,
       tokenType:options.token_type
     });
-    this.spotify.me();
+
+
+    await this.spotify.me();
+
+    this.$router.push("dashboard")
 
     
   },
