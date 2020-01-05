@@ -12,8 +12,7 @@ const plugin = (options) => {
                 Authorization:getAuthorisation()
             }
         });
-
-        console.log(res);
+        return res;
     }
 
     const getAuthorisation = () => {
