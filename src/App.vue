@@ -41,7 +41,6 @@ export default {
   watch:{
     // this is used to cache the state to localstorage
     stateHash(){
-      console.log("state change!")
       if(!this.$store.state.fresh){
         localStorage.setItem("stateCache",JSON.stringify(this.$store.state))
       }
