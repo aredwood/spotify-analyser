@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import Callback from '../views/Callback.vue'
 
 Vue.use(VueRouter)
 
@@ -9,6 +10,11 @@ const routes = [
     path: '/',
     name: 'home',
     component: Home
+  },
+  {
+    path:"/callback",
+    name:"callback",
+    component:Callback
   },
   {
     path: '/about',
