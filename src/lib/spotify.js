@@ -68,8 +68,7 @@ const plugin = (options) => {
 
 
             const allTracks = await getTracks([]);
-            
-            console.log(allTracks);
+
             return allTracks;
         }
     }
