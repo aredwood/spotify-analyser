@@ -5,38 +5,77 @@ const plugin = (options) => {
     // clean this shit up
     const me = async () => {
         const res = await rp({
-            uri:"https://api.spotify.com/v1/me",
-            headers:{
-                Authorization:getAuthorisation()
+            uri: "https://api.spotify.com/v1/me",
+            headers: {
+                Authorization: getAuthorisation()
             }
         });
-        store.commit("updateDisplayName",res.display_name);
+        store.commit("updateDisplayName", res.display_name);
         return JSON.parse(res);
     }
 
     const getAuthorisation = () => {
-        return `Bearer ${store.state.auth.accessToken}`   
+        return `Bearer ${store.state.auth.accessToken}`
     }
 
     // playlists
     const playlists = {
         list: async () => {
-            //TODO add pagination
-            const res = await rp({
-                uri:"https://api.spotify.com/v1/me/playlists",
-                headers:{
-                    Authorization:getAuthorisation()
-                },
-                json:true
-            });
 
-            store.commit("setPlaylists",res.items);
-            return res.items;
+            const getItems = async (exisitngPlaylists) => {
+                const res = await rp({
+                    uri: `https://api.spotify.com/v1/me/playlists?offset=${exisitngPlaylists.length}`,
+                    headers: {
+                        Authorization: getAuthorisation()
+                    },
+                    json: true
+                });
+
+                const items = res.items;
+
+                if (items.length < 20) {
+                    return exisitngPlaylists.concat(items);
+                }
+                else {
+                    return await getItems(exisitngPlaylists.concat(items));
+                }
+            }
+
+            const allItems = await getItems([]);
+            store.commit("setPlaylists", allItems);
+            return allItems
+        },
+        getTracks: async (playlistId) => {
+
+            const getTracks = async (existingTracks) => {
+                const res = await rp({
+                    uri: `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${existingTracks.length}`,
+                    headers:{
+                        Authorization: getAuthorisation()
+                    },
+                    json:true
+                });
+
+                const tracks = res.items;
+
+                if(tracks.length < 20){
+                    return existingTracks.concat(tracks)
+                }
+                else{
+                    return await getTracks(existingTracks.concat(tracks))
+                }
+            }
+
+
+            const allTracks = await getTracks([]);
+            
+            console.log(allTracks);
+            return allTracks;
         }
     }
 
     const checkValidity = async () => {
-        try{
+        try {
             await me();
             return true;
         }

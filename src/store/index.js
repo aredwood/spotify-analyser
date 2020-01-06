@@ -17,11 +17,19 @@ export default new Vuex.Store({
     playlists:{
       list:[],
       time:0
+    },
+    window:{
+      height:0,
+      width:0
     }
   },
   mutations: {
     updateAuth(state,auth){
       state.auth = auth;
+    },
+    updateDimensions(state,dimensions){
+      state.window.height = dimensions.height;
+      state.window.width = dimensions.width;
     },
     updateDisplayName(state,displayName){
       state.user.displayName = displayName;
