@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Callback from '../views/Callback.vue'
 import Dashboard from '../views/Dashboard.vue'
+import Playlist from '../views/analyse/Playlist.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -10,6 +11,11 @@ const routes = [
     path: '/',
     name: 'home',
     component: Home
+  },
+  {
+    path: "/analyse/playlist/:playlistId",
+    name: "analysePlaylist",
+    component: Playlist
   },
   {
     path: "/dashboard",

@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto" max-width="400" raised id="playlistCard">
+  <v-card class="mx-auto" max-width="400" raised id="playlistCard" v-on:click="goToAnalyse">
     <v-list-item three-line>
       <v-list-item-content>
         <div class="overline mb-4">By {{playlist.owner.display_name}}</div>
@@ -37,6 +37,11 @@ export default {
             const images = this.playlist.images;
             const lastImage = images[0];
             return lastImage.url;
+        }
+    },
+    methods:{
+        goToAnalyse(){
+            this.$router.push("/analyse/playlist/" + this.playlist.id);
         }
     }
 };

@@ -22,27 +22,33 @@ export default {
       return this.$store.state.fresh;
     }
   },
-  mounted(){
-    if(this.fresh){
-
+  // this is used to populate as much data as we can.
+  async beforeCreate(){
+    if(!this.$store.state.auth.accessToken){
       try{
-        let cache = JSON.parse(localStorage.getItem("stateCache"));
-        cache.fresh = false;
-        this.$store.commit("setState",cache);
+        const cachedToken = localStorage.getItem("accessToken");
+        this.$store.commit("updateAuth",{
+          tokenType:"Bearer",
+          expiresIn:"3600",
+          accessToken:cachedToken
+        });
       }
       catch(err){
         // failed
       }
-
-      this.$store.commit("setFresh",false);
     }
+
+    // could be async, but we're not actually concerned when this is populated.
+    this.spotify.playlists.list();
+
+    
 
   },
   watch:{
-    // this is used to cache the state to localstorage
+    // this is used anytime there is a state change, at all.
     stateHash(){
-      if(!this.$store.state.fresh){
-        localStorage.setItem("stateCache",JSON.stringify(this.$store.state))
+      if(this.$store.state.auth.accessToken){
+        localStorage.setItem("accessToken",this.$store.state.auth.accessToken)
       }
     }
   }
