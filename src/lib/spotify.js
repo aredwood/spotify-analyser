@@ -50,18 +50,18 @@ const plugin = (options) => {
             const getTracks = async (existingTracks) => {
                 const res = await rp({
                     uri: `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${existingTracks.length}`,
-                    headers:{
+                    headers: {
                         Authorization: getAuthorisation()
                     },
-                    json:true
+                    json: true
                 });
 
                 const tracks = res.items;
 
-                if(tracks.length < 20){
+                if (tracks.length < 20) {
                     return existingTracks.concat(tracks)
                 }
-                else{
+                else {
                     return await getTracks(existingTracks.concat(tracks))
                 }
             }
@@ -70,6 +70,18 @@ const plugin = (options) => {
             const allTracks = await getTracks([]);
 
             return allTracks;
+        }
+    }
+
+    const artist = {
+        get: async (artistId) => {
+            const res = await rp({
+                uri: "https://api.spotify.com/v1/artists/" + artistId,
+                headers: {
+                    Authorization: getAuthorisation()
+                }
+            });
+            return JSON.parse(res);
         }
     }
 
@@ -85,6 +97,7 @@ const plugin = (options) => {
 
     return {
         me,
+        artist,
         playlists,
         checkValidity
     }

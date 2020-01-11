@@ -1,115 +1,106 @@
 <template>
   <div>
-    <div id="iconContainer">
-      <img
-        v-for="trackIcon in trimmedIcons"
-        v-bind:key="trackIcon.trackId"
-        v-bind:src="trackIcon.icon"
-        :height="idealDimensions + 'px'"
-        :width="idealDimensions + 'px'"
-      />
-    </div>
-    <div id="gradient" v-bind:style="gradientStyle"></div>
-		<div id="title" v-bind:style="titleStyle" class="font-weight-bold">{{playlistName}}</div>
+    <PlaylistCollage :playlistId="playlistId" :tracks="tracks" :trackIcons="trackIcons" />
+
+    <!-- amount of tracks -->
+    <v-container>
+      <v-row no-gutters>
+        <!-- <v-col v-for="n in 3" :key="n" cols="12" sm="4">
+          <v-card class="pa-2" outlined tile>One of three columns</v-card>
+        </v-col>-->
+        <v-col cols="12">
+          <span class="display-4">
+            {{this.tracks.length}}
+            <br />
+          </span>
+          the amount of tracks in this playlist
+        </v-col>
+
+        <v-col cols="12">
+          <span class="display-4">{{mostPopularArtist.name}}</span>
+          <br />appears the most in this playlist
+        </v-col>a
+        <v-col cols="12">
+          <span class="display-4">{{((totalPlaylistDurationSeconds/60).toFixed(1)).toLocaleString()}}</span>
+          <br />minutes worth of "bangers"
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 <script>
-import lodash from "lodash";
+import PlaylistCollage from "@/components/PlaylistCollage.vue";
 export default {
   name: "analysePlaylist",
-  computed: {
-    playlistId() {
-      return this.$route.params.playlistId;
-    },
-    playlistSummary() {
-      const matchingPlaylist = this.$store.state.playlists.list.filter(
-        playlist => {
-          return playlist.id === this.playlistId;
-        }
-      );
-      return matchingPlaylist[0];
-		},
-		playlistName(){
-			try{
-				return this.playlistSummary.name;
-			}
-			catch{
-				return ""
-			}
-		},	
-    trackIcons() {
-      const icons = this.tracks.map(track => {
-        return this.getThumbnail(track);
-      });
-      return icons;
-		},
-		titleStyle(){
-			return {
-				"z-index":2,
-				"top":"0px",
-				"padding-top":((this.maxRows * this.idealDimensions) / 2) + "px",
-				"width":"100%",
-				"text-align":"center",
-				"position":"absolute",
-				"color":"white",
-				"font-size":"3rem"
-			}
-		},
-    trimmedIcons() {
-			const neededIcons = this.maxRows * this.rowLength;
-
-			if(this.trackIcons.length >= neededIcons){
-				return this.trackIcons.slice(0, this.maxRows * this.rowLength);
-			}
-			else if(this.trackIcons.length === 0){
-				return this.trackIcons;
-			}
-			else {
-				// const shortByFactor = Math.ceil((neededIcons - this.trackIcons.length) / (this.trackIcons.length));
-				let icons = this.trackIcons;
-
-				for(let i =0; i <= neededIcons;i++){
-					icons.push(lodash.sample(this.trackIcons))
-				}
-
-				// return icons;
-				return icons.slice(0, this.maxRows * this.rowLength);
-			}
-
-      // return this.trackIcons.slice(0, this.maxRows * this.rowLength);
-		},
-		gradientStyle(){
-			return {
-				height:(this.maxRows * this.idealDimensions) + "px"
-			}
-		},
-    windowWidth() {
-      return this.$store.state.window.width;
-    },
-    windowHeight() {
-      return this.$store.state.window.height;
-    },
-    idealDimensions() {
-      return this.windowWidth / Math.ceil(this.windowWidth / 64);
-    },
-    rowLength() {
-      return (this.windowWidth / this.idealDimensions).toFixed(0);
-    },
-    maxRows() {
-      return Math.ceil(
-        this.windowHeight / this.collageRatio / this.idealDimensions
-      );
-    }
+  components: {
+    PlaylistCollage
   },
   data() {
     return {
       tracks: [],
-      collageRatio: 1
+      mostPopularArtist: {}
     };
   },
   async mounted() {
     const tracks = await this.spotify.playlists.getTracks(this.playlistId);
     this.tracks = tracks;
+  },
+  computed: {
+    playlistId() {
+      return this.$route.params.playlistId;
+    },
+    trackIcons() {
+      const icons = this.tracks.map(track => {
+        return this.getThumbnail(track);
+      });
+      return icons;
+    },
+    totalPlaylistDurationSeconds() {
+      let duration = 0;
+
+      if (this.tracks.length === 0) {
+        return 0;
+      }
+
+      for (let i = 0; i < this.tracks.length; i++) {
+        const { track } = this.tracks[i];
+        duration += track.duration_ms;
+      }
+
+      return Math.floor(duration / 1000);
+    },
+    mostPopularArtistId() {
+      var artists = {};
+
+      this.tracks.forEach(trackInPlaylist => {
+        const { track } = trackInPlaylist;
+
+        const artistsInTrack = track.artists;
+
+        artistsInTrack.forEach(artist => {
+          const artistId = artist.id;
+
+          if (typeof artists[artistId] === "undefined") {
+            artists[artistId] = 1;
+          } else {
+            artists[artistId] = artists[artistId] + 1;
+          }
+        });
+      });
+
+      // sort
+      const sortedArtists = Object.keys(artists).sort((a, b) => {
+        return artists[b] - artists[a];
+      });
+
+      return sortedArtists[0];
+    }
+  },
+  watch: {
+    async mostPopularArtistId(newValue) {
+      const artistDetails = await this.spotify.artist.get(newValue);
+      this.mostPopularArtist = artistDetails;
+    }
   },
   methods: {
     getThumbnail(track) {
@@ -127,21 +118,4 @@ export default {
 };
 </script>
 <style scoped>
-#iconContainer {
-  line-height: 0px;
-	z-index: -1;
-
-}
-#gradient {
-  background: rgb(0, 0, 0);
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 1) 100%
-  );
-  z-index: 1;
-	position: absolute;
-	width:100%;
-	top:0px;
-}
 </style>
