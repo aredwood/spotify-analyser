@@ -3,11 +3,13 @@
     <PlaylistCollage :playlistId="playlistId" :tracks="tracks" :trackIcons="trackIcons" />
 
     <!-- amount of tracks -->
-    <v-container>
+    <v-container v-if="loadedTracks">
       <v-row no-gutters>
         <!-- <v-col v-for="n in 3" :key="n" cols="12" sm="4">
           <v-card class="pa-2" outlined tile>One of three columns</v-card>
         </v-col>-->
+
+        <!-- the amount of tracks -->
         <v-col cols="12">
           <span class="display-4">
             {{this.tracks.length}}
@@ -15,20 +17,45 @@
           </span>
           the amount of tracks in this playlist
         </v-col>
-
+        <!-- the most popular artist -->
         <v-col cols="12">
           <span class="display-4">{{mostPopularArtist.name}}</span>
           <br />appears the most in this playlist
-        </v-col>a
+        </v-col>
+
+        <!-- the length -->
         <v-col cols="12">
-          <span class="display-4">{{((totalPlaylistDurationSeconds/60).toFixed(1)).toLocaleString()}}</span>
+          <span
+            class="display-4"
+          >{{((totalPlaylistDurationSeconds/60).toFixed(1)).toLocaleString()}}</span>
           <br />minutes worth of "bangers"
+        </v-col>
+      </v-row>
+
+      <v-row id="deepInsight" v-if="loadedFeatures">
+
+        
+        <v-col cols="6" v-for="attribute in featureAttributes" v-bind:key="attribute+'high'">
+          <span
+            class="display-1"
+          >{{(findTrackInPlaylist(polarEnds.high[attribute].trackId))['track']['name']}}</span>
+          <br />
+          the highest "{{attribute}}"
+        </v-col>
+
+        <v-col cols="6" v-for="attribute in featureAttributes" v-bind:key="attribute">
+          <span
+            class="display-1"
+          >{{(findTrackInPlaylist(polarEnds.low[attribute].trackId))['track']['name']}}</span>
+          <br />
+          the lowest "{{attribute}}"
         </v-col>
       </v-row>
     </v-container>
   </div>
 </template>
 <script>
+import lodash from "lodash";
 import PlaylistCollage from "@/components/PlaylistCollage.vue";
 export default {
   name: "analysePlaylist",
@@ -38,7 +65,19 @@ export default {
   data() {
     return {
       tracks: [],
-      mostPopularArtist: {}
+      features: [],
+      mostPopularArtist: {},
+      featureAttributes: [
+        "acousticness",
+        "danceability",
+        "energy",
+        "instrumentalness",
+        "liveness",
+        // "loudness",
+        "speechiness",
+        "valence",
+        "tempo"
+      ]
     };
   },
   async mounted() {
@@ -56,50 +95,69 @@ export default {
       return icons;
     },
     totalPlaylistDurationSeconds() {
-      let duration = 0;
-
-      if (this.tracks.length === 0) {
-        return 0;
-      }
-
-      for (let i = 0; i < this.tracks.length; i++) {
-        const { track } = this.tracks[i];
-        duration += track.duration_ms;
-      }
-
-      return Math.floor(duration / 1000);
+      return this.spotify.playlists.getTotalDurationsSeconds(this.tracks);
     },
     mostPopularArtistId() {
-      var artists = {};
+      return this.spotify.playlists.getMostPopularArtist(this.tracks);
+    },
+    loadedTracks() {
+      return this.tracks.length > 0;
+    },
+    loadedFeatures() {
+      return (
+        this.tracks.length == this.features.length && this.tracks.length > 0
+      );
+    },
+    polarEnds() {
+      // traverse to find, prototypes may mutate
 
-      this.tracks.forEach(trackInPlaylist => {
-        const { track } = trackInPlaylist;
+      let high = {};
+      let low = {};
 
-        const artistsInTrack = track.artists;
+      this.featureAttributes.forEach(attributte => {
+        low[attributte] = {
+          trackId: "",
+          value: Infinity
+        };
 
-        artistsInTrack.forEach(artist => {
-          const artistId = artist.id;
+        high[attributte] = {
+          trackId: "",
+          value: 0
+        };
+      });
 
-          if (typeof artists[artistId] === "undefined") {
-            artists[artistId] = 1;
-          } else {
-            artists[artistId] = artists[artistId] + 1;
+      this.features.forEach(feature => {
+        this.featureAttributes.forEach(attribute => {
+          const value = feature[attribute];
+
+          if (value < low[attribute].value) {
+            low[attribute].value = value;
+            low[attribute].trackId = feature.id;
+          }
+
+          if (value > high[attribute].value) {
+            high[attribute].value = value;
+            high[attribute].trackId = feature.id;
           }
         });
       });
 
-      // sort
-      const sortedArtists = Object.keys(artists).sort((a, b) => {
-        return artists[b] - artists[a];
-      });
-
-      return sortedArtists[0];
+      return {
+        low,
+        high
+      };
     }
   },
   watch: {
     async mostPopularArtistId(newValue) {
       const artistDetails = await this.spotify.artist.get(newValue);
       this.mostPopularArtist = artistDetails;
+    },
+    async loadedTracks(newValue) {
+      if (newValue) {
+        const features = await this.getFeatures();
+        this.features = features;
+      }
     }
   },
   methods: {
@@ -113,6 +171,35 @@ export default {
       } catch (err) {
         return false;
       }
+    },
+    findTrackInPlaylist(trackId) {
+      const found = this.tracks.filter(track => {
+        return track.track.id === trackId;
+      })[0];
+
+      return found;
+    },
+    async getFeatures() {
+      // chunks of 100
+      const trackIds = this.tracks.map(track => {
+        const id = track.track.id;
+        return id;
+      });
+
+      const chunks = lodash.chunk(trackIds, 95);
+      let requests = [];
+
+      chunks.forEach(chunk => {
+        requests.push(this.spotify.audioFeatures.get(chunk));
+      });
+
+      const allFeatures = await Promise.all(requests);
+
+      const features = allFeatures.reduce((acc, curr) => {
+        return acc.concat(curr.audio_features);
+      }, []);
+
+      return features;
     }
   }
 };
