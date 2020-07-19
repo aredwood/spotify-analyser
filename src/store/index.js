@@ -18,6 +18,7 @@ export default new Vuex.Store({
       list:[],
       time:0
     },
+    playlistContent:{},
     window:{
       height:0,
       width:0
@@ -45,6 +46,12 @@ export default new Vuex.Store({
     },
     setState(state,newState){
       state = newState;
+    },
+    setPlaylistTracks(state,playlistDetails){
+      console.log({
+        playlistDetails
+      })
+      state.playlistContent[playlistDetails.id] = playlistDetails.tracks
     }
 
   },
