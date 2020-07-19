@@ -17,11 +17,20 @@ export default new Vuex.Store({
     playlists:{
       list:[],
       time:0
+    },
+    playlistContent:{},
+    window:{
+      height:0,
+      width:0
     }
   },
   mutations: {
     updateAuth(state,auth){
       state.auth = auth;
+    },
+    updateDimensions(state,dimensions){
+      state.window.height = dimensions.height;
+      state.window.width = dimensions.width;
     },
     updateDisplayName(state,displayName){
       state.user.displayName = displayName;
@@ -37,6 +46,9 @@ export default new Vuex.Store({
     },
     setState(state,newState){
       state = newState;
+    },
+    setPlaylistTracks(state,playlistDetails){
+      state.playlistContent[playlistDetails.id] = playlistDetails.tracks
     }
 
   },
