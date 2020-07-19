@@ -4,16 +4,9 @@
   </transition>
 </template>
 <script>
-//   <!-- <img
-//     v-for="trackIcon in trimmedIcons"
-//     v-bind:key="trackIcon.trackId"
-//     v-bind:src="trackIcon.icon"
-//     :height="idealDimensions + 'px'"
-//     :width="idealDimensions + 'px'"
-//   /> -->
+
 import lodash from "lodash";
 import gsap from "gsap";
-// import TWEEN from "@tweenjs/tween.js"
 export default {
   name: "Icon",
   props: {
@@ -64,8 +57,6 @@ export default {
       }
     },
     async transition(newImage){
-
-
 
         await gsap.to(this.$data,{
             duration:lodash.random(0.5,3,true),
