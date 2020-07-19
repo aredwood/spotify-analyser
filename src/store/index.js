@@ -22,7 +22,8 @@ export default new Vuex.Store({
     window:{
       height:0,
       width:0
-    }
+    },
+    playlistsLastUpdated:0
   },
   mutations: {
     updateAuth(state,auth){
@@ -49,6 +50,9 @@ export default new Vuex.Store({
     },
     setPlaylistTracks(state,playlistDetails){
       state.playlistContent[playlistDetails.id] = playlistDetails.tracks
+    },
+    playlistsLastUpdated(state,timestamp){
+      state.playlistsLastUpdated = timestamp
     }
 
   },
