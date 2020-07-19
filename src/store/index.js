@@ -48,9 +48,6 @@ export default new Vuex.Store({
       state = newState;
     },
     setPlaylistTracks(state,playlistDetails){
-      console.log({
-        playlistDetails
-      })
       state.playlistContent[playlistDetails.id] = playlistDetails.tracks
     }
 
