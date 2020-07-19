@@ -1,10 +1,18 @@
 <template>
   <div>
     <div id="iconContainer">
-      <img
+      <!-- <img
         v-for="trackIcon in trimmedIcons"
         v-bind:key="trackIcon.trackId"
         v-bind:src="trackIcon.icon"
+        :height="idealDimensions + 'px'"
+        :width="idealDimensions + 'px'"
+      /> -->
+      <Icon
+        v-for="trackIcon in trimmedIcons"
+        v-bind:key="trackIcon.trackId"
+        :playlistId="playlistId"
+        :initial="trackIcon.icon"
         :height="idealDimensions + 'px'"
         :width="idealDimensions + 'px'"
       />
@@ -14,6 +22,7 @@
   </div>
 </template>
 <script>
+import Icon from "./Icon"
 import lodash from "lodash";
 export default {
   name: "playlistCollage",
@@ -30,6 +39,9 @@ export default {
       type:Array,
       required:true
     }
+  },
+  components:{
+    Icon
   },
   computed: {
     playlistSummary() {
@@ -117,6 +129,7 @@ export default {
 #iconContainer {
   line-height: 0px;
   z-index: -1;
+  background-color: black
 }
 #gradient {
   background: rgb(0, 0, 0);

@@ -26,3 +26,8 @@ const instance = new Vue({
 }).$mount('#app');
 
 window.instance = instance;
+
+
+setInterval(() => {
+  window.instance.$emit("tick")
+},3000)

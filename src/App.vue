@@ -6,6 +6,7 @@
 
 <script>
 import objectHash from "object-hash";
+
 export default {
   name: "App",
   components: {},
