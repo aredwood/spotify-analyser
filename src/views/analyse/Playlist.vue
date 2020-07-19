@@ -80,7 +80,6 @@ export default {
   },
   data() {
     return {
-      tracks: [],
       features: [],
       mostPopularArtist: {},
       featureAttributes: [
@@ -98,7 +97,10 @@ export default {
   },
   async mounted() {
     const tracks = await this.spotify.playlists.getTracks(this.playlistId);
-    this.tracks = tracks;
+    this.$store.commit("setPlaylistTracks",{
+      id:this.playlistId,
+      tracks:tracks
+    })
   },
   computed: {
     playlistId() {
@@ -109,6 +111,9 @@ export default {
         return this.getThumbnail(track);
       });
       return icons;
+    },
+    tracks(){
+      return (this.$store.state.playlistContent[this.playlistId]) ?? []
     },
     totalPlaylistDurationSeconds() {
       return this.spotify.playlists.getTotalDurationsSeconds(this.tracks);
