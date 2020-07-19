@@ -113,7 +113,7 @@ export default {
       return icons;
     },
     tracks(){
-      return (this.$store.state.playlistContent[this.playlistId]) ?? []
+      return (this.$store.state.playlistContent[this.playlistId]) || []
     },
     totalPlaylistDurationSeconds() {
       return this.spotify.playlists.getTotalDurationsSeconds(this.tracks);
