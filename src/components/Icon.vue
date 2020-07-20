@@ -26,7 +26,8 @@ export default {
   data() {
     return {
       currentIcon: this.initial,
-      opacity:1
+      opacity:1,
+      chance: 0.15
     };
   },
   created() {
@@ -72,7 +73,7 @@ export default {
     },
     changeOver() {
       const rand = lodash.random(1,true);
-      return rand < 0.2
+      return rand < this.chance
     }
   }
 };
