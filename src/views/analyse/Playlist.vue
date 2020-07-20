@@ -81,6 +81,7 @@ export default {
   data() {
     return {
       features: [],
+      tracks:[],
       mostPopularArtist: {},
       featureAttributes: [
         "acousticness",
@@ -101,8 +102,12 @@ export default {
       id:this.playlistId,
       tracks:tracks
     })
+    this.$store.commit("playlistsLastUpdated",new Date().getTime())
   },
   computed: {
+    playlistsLastUpdated(){
+      return this.$store.state.playlistsLastUpdated
+    },
     playlistId() {
       return this.$route.params.playlistId;
     },
@@ -111,9 +116,6 @@ export default {
         return this.getThumbnail(track);
       });
       return icons;
-    },
-    tracks(){
-      return (this.$store.state.playlistContent[this.playlistId]) ?? []
     },
     totalPlaylistDurationSeconds() {
       return this.spotify.playlists.getTotalDurationsSeconds(this.tracks);
@@ -179,6 +181,9 @@ export default {
         const features = await this.getFeatures();
         this.features = features;
       }
+    },
+    playlistsLastUpdated(){
+      this.tracks = this.$store.state.playlistContent[this.playlistId] || [];
     }
   },
   methods: {
