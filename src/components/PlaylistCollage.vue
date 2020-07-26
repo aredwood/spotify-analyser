@@ -104,7 +104,7 @@ export default {
       return this.$store.state.window.height;
     },
     idealDimensions() {
-      return this.windowWidth / Math.ceil(this.windowWidth / 64);
+      return this.windowWidth / Math.ceil(this.windowWidth / this.targetSize);
     },
     rowLength() {
       return (this.windowWidth / this.idealDimensions).toFixed(0);
@@ -117,11 +117,18 @@ export default {
   },
   data() {
     return {
-      collageRatio: 1
+      // how much of the screen does the collage take
+      // as a ratio of the height
+      collageRatio: 1,
+      // the size of each icon, ideally.
+      targetSize:64
     };
   },
   methods: {
 
+  },
+  created(){
+    window.instance.$emit("tick")
   }
 };
 </script>
