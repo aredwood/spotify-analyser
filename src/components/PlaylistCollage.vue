@@ -128,7 +128,7 @@ export default {
 
   },
   created(){
-    window.instance.$emit("tick")
+    // window.instance.$emit("tick")
   }
 };
 </script>

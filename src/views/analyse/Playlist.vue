@@ -5,78 +5,22 @@
     <!-- amount of tracks -->
     <v-container v-if="loadedTracks">
       <v-row no-gutters>
-        <!-- <v-col v-for="n in 3" :key="n" cols="12" sm="4">
-          <v-card class="pa-2" outlined tile>One of three columns</v-card>
-        </v-col>-->
-
-        <!-- the amount of tracks -->
-        <!-- <v-col cols="12">
-          <span class="display-4">
-            {{this.tracks.length}}
-            <br />
-          </span>
-          the amount of tracks in this playlist
-        </v-col> -->
-        <!-- the most popular artist -->
-        <!-- <v-col cols="12">
-          <span class="display-4">{{mostPopularArtist.name}}</span>
-          <br />appears the most in this playlist
-        </v-col> -->
-
-        <!-- the length -->
-        <!-- <v-col cols="12">
-          <span
-            class="display-4"
-          >{{((totalPlaylistDurationSeconds/60).toFixed(1)).toLocaleString()}}</span>
-          <br />minutes worth of "bangers"
-        </v-col> -->
+        <AttributeChart :features="features" :attribute="'danceability'"/>
       </v-row>
-
-      <div id="deepInsight" v-if="loadedFeatures" >
-
-        <v-row v-for="attribute in featureAttributes" v-bind:key="attribute">
-          <FeatureCard 
-            v-bind:track="findTrackInPlaylist(polarEnds.high[attribute].trackId)['track']"
-            end="high"
-            v-bind:attribute="attribute"
-          />
-          <FeatureCard 
-            v-bind:track="findTrackInPlaylist(polarEnds.low[attribute].trackId)['track']"
-            end="low"
-            v-bind:attribute="attribute"
-          />
-        </v-row>
-
-
-        
-        <!-- <v-col cols="6" v-for="attribute in featureAttributes" v-bind:key="attribute+'high'">
-          <span
-            class="display-1"
-          >{{(findTrackInPlaylist(polarEnds.high[attribute].trackId))['track']['name']}}</span>
-          <br />
-          the highest "{{attribute}}"
-        </v-col> -->
-
-        <!-- <v-col cols="6" v-for="attribute in featureAttributes" v-bind:key="attribute">
-          <span
-            class="display-1"
-          >{{(findTrackInPlaylist(polarEnds.low[attribute].trackId))['track']['name']}}</span>
-          <br />
-          the lowest "{{attribute}}"
-        </v-col> -->
-      </div>
     </v-container>
   </div>
 </template>
 <script>
+import AttributeChart from "@/components/chart/AttributeChart.vue"
 import lodash from "lodash";
 import PlaylistCollage from "@/components/PlaylistCollage.vue";
-import FeatureCard from "@/components/cards/track/FeatureCard.vue"
+// import FeatureCard from "@/components/cards/track/FeatureCard.vue"
 export default {
   name: "analysePlaylist",
   components: {
     PlaylistCollage,
-    FeatureCard
+    // FeatureCard,
+    AttributeChart
   },
   data() {
     return {
