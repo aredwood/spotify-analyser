@@ -9,6 +9,9 @@ export default {
     },
     attribute: {
       type: String
+    },
+    playlistId:{
+      type: String
     }
   },
   computed: {
@@ -20,9 +23,25 @@ export default {
         };
       });
     },
+    playlistContent(){
+      const playlist = this.$store.state.playlistContent[this.playlistId].map(track_added => {
+        return track_added.track;
+      })
+
+      let tracks = {};
+
+      for(let i = 0; i < playlist.length;i++){
+        const item = playlist[i];
+
+        tracks[item.id] = item;
+      }
+
+      return tracks;
+    },
     keys() {
       return this.kvPair.map(kv => {
-        return kv.key;
+        // return kv.key;
+        return this.playlistContent[kv.key].name;
       });
     },
     values() {
@@ -36,7 +55,7 @@ export default {
           labels: this.keys,
           datasets: [
             {
-              label: "Tracks",
+              label: this.attribute,
               backgroundColor: "#f87979",
               data: this.values
             }
@@ -56,7 +75,9 @@ export default {
       };
     }
   },
-  data() {},
+  data() {
+    return {};
+  },
 	watch:{
 		chartData(){
 			this.renderChart(this.chartData.chartdata,this.chartData.options)

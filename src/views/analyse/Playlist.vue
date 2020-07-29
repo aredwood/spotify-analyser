@@ -5,7 +5,7 @@
     <!-- amount of tracks -->
     <v-container v-if="loadedTracks">
       <v-row no-gutters>
-        <AttributeChart :features="features" :attribute="'danceability'"/>
+        <AttributeChart :styles="chartStyle" :features="features" :attribute="'valence'" :playlistId="playlistId"/>
       </v-row>
     </v-container>
   </div>
@@ -37,7 +37,10 @@ export default {
         "speechiness",
         "valence",
         "tempo"
-      ]
+      ],
+      chartStyle:{
+        "width":"100%"
+      }
     };
   },
   async mounted() {
